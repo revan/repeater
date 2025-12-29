@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
-const WorkoutConfig = () => {
+interface WorkoutConfigProps {
+  onStart: (settings: { reps: number; workTime: number; restTime: number }) => void;
+}
+
+const WorkoutConfig = ({ onStart }: WorkoutConfigProps) => {
   const [reps, setReps] = useLocalStorage('repeater-reps', 5);
   const [workTime, setWorkTime] = useLocalStorage('repeater-work-time', 10);
   const [restTime, setRestTime] = useLocalStorage('repeater-rest-time', 30);
@@ -68,6 +72,7 @@ const WorkoutConfig = () => {
           size="lg" 
           className="w-full h-16 text-xl rounded-2xl gap-3 font-bold shadow-lg shadow-primary/20"
           type="button"
+          onClick={() => onStart({ reps, workTime, restTime })}
         >
           <Play className="fill-current" />
           START WORKOUT
