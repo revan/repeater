@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import NumberInput from './NumberInput';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,9 +6,9 @@ import { Play } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const WorkoutConfig = () => {
-  const [reps, setReps] = useState(10);
-  const [workTime, setWorkTime] = useState(30);
-  const [restTime, setRestTime] = useState(10);
+  const [reps, setReps] = useLocalStorage('repeater-reps', 5);
+  const [workTime, setWorkTime] = useLocalStorage('repeater-work-time', 10);
+  const [restTime, setRestTime] = useLocalStorage('repeater-rest-time', 30);
 
   const totalSeconds = (workTime * reps) + (restTime * (reps - 1));
   
