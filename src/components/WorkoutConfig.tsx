@@ -24,14 +24,14 @@ const WorkoutConfig = ({ onStart }: WorkoutConfigProps) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background p-6">
-      <header className="py-8 text-center">
+    <div className="flex flex-col h-dvh bg-background p-6 overflow-hidden">
+      <header className="py-4 text-center">
         <h1 className="text-3xl font-black tracking-tight">REPEATER</h1>
       </header>
 
-      <main className="flex-1 flex flex-col max-w-md mx-auto w-full">
+      <main className="flex-1 flex flex-col max-w-md mx-auto w-full justify-center">
         <Card className="border-none shadow-none bg-transparent">
-          <CardContent className="p-0 space-y-4">
+          <CardContent className="p-0 space-y-2">
             <div className="bg-card rounded-2xl p-4 border shadow-sm">
               <NumberInput 
                 label="Reps" 
@@ -39,14 +39,14 @@ const WorkoutConfig = ({ onStart }: WorkoutConfigProps) => {
                 onChange={setReps} 
                 min={1} 
               />
-              <Separator className="my-2" />
+              <Separator className="my-1" />
               <NumberInput 
                 label="Work Time" 
                 value={workTime} 
                 onChange={setWorkTime} 
                 min={1} 
               />
-              <Separator className="my-2" />
+              <Separator className="my-1" />
               <NumberInput 
                 label="Rest Time" 
                 value={restTime} 
@@ -55,7 +55,7 @@ const WorkoutConfig = ({ onStart }: WorkoutConfigProps) => {
               />
             </div>
 
-            <div className="pt-8 text-center">
+            <div className="pt-4 text-center">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 Total Workout Time
               </span>
@@ -67,10 +67,10 @@ const WorkoutConfig = ({ onStart }: WorkoutConfigProps) => {
         </Card>
       </main>
 
-      <footer className="max-w-md mx-auto w-full py-8">
+      <footer className="max-w-md mx-auto w-full py-4">
         <Button 
           size="lg" 
-          className="w-full h-16 text-xl rounded-2xl gap-3 font-bold shadow-lg shadow-primary/20"
+          className="w-full h-14 text-xl rounded-2xl gap-3 font-bold shadow-lg shadow-primary/20"
           type="button"
           onClick={() => onStart({ reps, workTime, restTime })}
         >

@@ -169,7 +169,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background p-6">
+    <div className="flex flex-col h-dvh bg-background p-6 overflow-hidden">
       {/* Top Header */}
       <header className="flex justify-between items-center h-16">
         <AlertDialog>
@@ -213,7 +213,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
         <div className="w-11" aria-hidden="true" />
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center space-y-12">
+      <main className="flex-1 flex flex-col items-center justify-center space-y-6">
         <div className="text-center w-full">
             <h2 className={cn(
               "text-2xl font-black uppercase tracking-[0.2em] mb-4 transition-colors duration-500",
@@ -226,8 +226,8 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
               className={cn(
                 "font-black leading-none tabular-nums",
                 phase === 'getReady' 
-                  ? "text-[10rem] animate-in zoom-in duration-300" 
-                  : "text-8xl"
+                  ? "text-8xl animate-in zoom-in duration-300" 
+                  : "text-7xl"
               )}
             >
                 {timeLeft > 0 ? Math.ceil(timeLeft) : ''}
@@ -246,7 +246,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
       </main>
 
       {/* Bottom spacer for layout balance */}
-      <footer className="h-16" aria-hidden="true" />
+      <footer className="h-8" aria-hidden="true" />
     </div>
   );
 };
