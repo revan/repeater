@@ -45,10 +45,10 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
 
   useEffect(() => {
     audioRefs.current = {
-      countdown: new Audio('/countdown.wav'),
-      countdownComplete: new Audio('/countdown-complete.wav'),
-      repComplete: new Audio('/rep-complete.wav'),
-      workoutComplete: new Audio('/workout-complete.wav'),
+      countdown: new Audio('/repeater/countdown.wav'),
+      countdownComplete: new Audio('/repeater/countdown-complete.wav'),
+      repComplete: new Audio('/repeater/rep-complete.wav'),
+      workoutComplete: new Audio('/repeater/workout-complete.wav'),
     };
   }, []);
 
