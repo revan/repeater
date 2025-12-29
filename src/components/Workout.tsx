@@ -33,6 +33,29 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
   
   const timerRef = useRef<number | null>(null);
   const lastVibratedSecond = useRef<number>(-1);
+  const lastPlayedCountdownSecond = useRef<number>(-1);
+
+  // Audio refs
+  const audioRefs = useRef<{
+    countdown: HTMLAudioElement;
+    repComplete: HTMLAudioElement;
+    workoutComplete: HTMLAudioElement;
+  } | null>(null);
+
+  useEffect(() => {
+    audioRefs.current = {
+      countdown: new Audio('/countdown.wav'),
+      repComplete: new Audio('/rep-complete.wav'),
+      workoutComplete: new Audio('/workout-complete.wav'),
+    };
+  }, []);
+
+  const playSound = (audio: HTMLAudioElement | undefined) => {
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(err => console.error("Audio playback failed:", err));
+    }
+  };
 
   const vibrate = (pattern: number | number[]) => {
     if (typeof window !== 'undefined' && window.navigator.vibrate) {
@@ -64,6 +87,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
       } else if (phase === 'work') {
         if (currentRep < reps) {
           vibrate(200);
+          playSound(audioRefs.current?.repComplete);
           if (restTime > 0) {
             setPhase('rest');
             setTimeLeft(restTime);
@@ -75,6 +99,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
           }
         } else {
           vibrate([200, 100, 200, 100, 200]);
+          playSound(audioRefs.current?.workoutComplete);
           setPhase('completed');
           setTimeout(onComplete, 1500);
         }
@@ -88,6 +113,17 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
 
     // Warning vibrations for last 3 seconds of rest
     const currentSecond = Math.ceil(timeLeft);
+    
+    // Countdown audio for getReady phase
+    if (phase === 'getReady' && currentSecond > 0) {
+      if (lastPlayedCountdownSecond.current !== currentSecond) {
+        playSound(audioRefs.current?.countdown);
+        lastPlayedCountdownSecond.current = currentSecond;
+      }
+    } else if (phase !== 'getReady') {
+      lastPlayedCountdownSecond.current = -1;
+    }
+
     if (phase === 'rest' && currentSecond <= 3 && currentSecond > 0) {
       if (lastVibratedSecond.current !== currentSecond) {
         vibrate(50);
