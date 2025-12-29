@@ -32,6 +32,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
   const [totalTime, setTotalTime] = useState(3);
   
   const timerRef = useRef<number | null>(null);
+  const lastVibratedSecond = useRef<number>(-1);
 
   const vibrate = (pattern: number | number[]) => {
     if (typeof window !== 'undefined' && window.navigator.vibrate) {
@@ -40,14 +41,13 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
   };
 
   useEffect(() => {
+    const startTime = Date.now();
+    const initialTimeLeft = timeLeft;
+
     timerRef.current = window.setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      const elapsed = (Date.now() - startTime) / 1000;
+      setTimeLeft(Math.max(0, initialTimeLeft - elapsed));
+    }, 50);
 
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
@@ -87,8 +87,14 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
     }
 
     // Warning vibrations for last 3 seconds of rest
-    if (phase === 'rest' && timeLeft <= 3 && timeLeft > 0) {
-      vibrate(50);
+    const currentSecond = Math.ceil(timeLeft);
+    if (phase === 'rest' && currentSecond <= 3 && currentSecond > 0) {
+      if (lastVibratedSecond.current !== currentSecond) {
+        vibrate(50);
+        lastVibratedSecond.current = currentSecond;
+      }
+    } else if (phase !== 'rest') {
+      lastVibratedSecond.current = -1;
     }
   }, [timeLeft, phase, currentRep, reps, workTime, restTime, onComplete]);
 
@@ -109,6 +115,15 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
       case 'work': return 'text-primary';
       case 'rest': return 'text-emerald-500';
       case 'completed': return 'text-primary';
+    }
+  };
+
+  const getPhaseBgColor = () => {
+    switch (phase) {
+      case 'getReady': return 'bg-amber-500';
+      case 'work': return 'bg-primary';
+      case 'rest': return 'bg-emerald-500';
+      default: return 'bg-primary';
     }
   };
 
@@ -166,7 +181,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
                 {getPhaseLabel()}
             </h2>
             <div 
-              key={phase === 'getReady' ? `${phase}-${timeLeft}` : phase}
+              key={phase === 'getReady' ? `${phase}-${Math.ceil(timeLeft)}` : phase}
               className={cn(
                 "font-black leading-none tabular-nums",
                 phase === 'getReady' 
@@ -174,13 +189,19 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
                   : "text-8xl"
               )}
             >
-                {timeLeft > 0 ? timeLeft : ''}
+                {timeLeft > 0 ? Math.ceil(timeLeft) : ''}
             </div>
         </div>
 
-        <div className="w-full max-w-sm px-4">
-            <Progress value={progress} className="h-4 rounded-full shadow-inner" />
-        </div>
+        {phase !== 'getReady' && phase !== 'completed' && (
+          <div className="w-full max-w-sm px-4">
+            <Progress 
+              value={progress} 
+              className="h-4 rounded-full shadow-inner" 
+              indicatorClassName={getPhaseBgColor()}
+            />
+          </div>
+        )}
       </main>
 
       {/* Bottom spacer for layout balance */}
