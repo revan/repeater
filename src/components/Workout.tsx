@@ -38,6 +38,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
   // Audio refs
   const audioRefs = useRef<{
     countdown: HTMLAudioElement;
+    countdownComplete: HTMLAudioElement;
     repComplete: HTMLAudioElement;
     workoutComplete: HTMLAudioElement;
   } | null>(null);
@@ -45,6 +46,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
   useEffect(() => {
     audioRefs.current = {
       countdown: new Audio('/countdown.wav'),
+      countdownComplete: new Audio('/countdown-complete.wav'),
       repComplete: new Audio('/rep-complete.wav'),
       workoutComplete: new Audio('/workout-complete.wav'),
     };
@@ -81,6 +83,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
   useEffect(() => {
     if (timeLeft === 0) {
       if (phase === 'getReady') {
+        playSound(audioRefs.current?.countdownComplete);
         setPhase('work');
         setTimeLeft(workTime);
         setTotalTime(workTime);
@@ -104,6 +107,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
           setTimeout(onComplete, 1500);
         }
       } else if (phase === 'rest') {
+        playSound(audioRefs.current?.countdownComplete);
         setCurrentRep((prev) => prev + 1);
         setPhase('work');
         setTimeLeft(workTime);
@@ -114,13 +118,14 @@ const Workout = ({ reps, workTime, restTime, onCancel, onComplete }: WorkoutProp
     // Warning vibrations for last 3 seconds of rest
     const currentSecond = Math.ceil(timeLeft);
     
-    // Countdown audio for getReady phase
-    if (phase === 'getReady' && currentSecond > 0) {
+    // Countdown audio for getReady and rest phases
+    const isCountingDown = phase === 'getReady' || (phase === 'rest' && currentSecond <= 3);
+    if (isCountingDown && currentSecond > 0) {
       if (lastPlayedCountdownSecond.current !== currentSecond) {
         playSound(audioRefs.current?.countdown);
         lastPlayedCountdownSecond.current = currentSecond;
       }
-    } else if (phase !== 'getReady') {
+    } else {
       lastPlayedCountdownSecond.current = -1;
     }
 
