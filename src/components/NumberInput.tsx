@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,8 @@ const NumberInput = ({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const valueRef = useRef(value);
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempValue, setTempValue] = useState(value.toString());
 
   // Keep valueRef in sync with the value prop for use in intervals
   useEffect(() => {
@@ -78,6 +80,27 @@ const NumberInput = ({
     }, 500); // 500ms initial delay
   }, [handleAction, stopRepeating]);
 
+  const handleBlur = () => {
+    setIsEditing(false);
+    let newValue = parseInt(tempValue, 10);
+    if (isNaN(newValue)) {
+      newValue = value;
+    } else {
+      newValue = Math.max(min, Math.min(max, newValue));
+    }
+    onChange(newValue);
+    setTempValue(newValue.toString());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setTempValue(value.toString());
+    }
+  };
+
   return (
     <div className={cn("flex items-center justify-between py-1", className)}>
       <Label className="text-base font-medium">{label}</Label>
@@ -106,9 +129,28 @@ const NumberInput = ({
         >
           <Minus className="h-4 w-4" />
         </Button>
-        <span className="min-w-[3rem] text-center text-2xl font-semibold tabular-nums">
-          {value}
-        </span>
+        {isEditing ? (
+          <input
+            type="number"
+            inputMode="numeric"
+            value={tempValue}
+            onChange={(e) => setTempValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="w-12 text-center text-2xl font-semibold tabular-nums bg-transparent border-none focus:outline-none p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            autoFocus
+          />
+        ) : (
+          <span 
+            className="min-w-[3rem] text-center text-2xl font-semibold tabular-nums cursor-text"
+            onClick={() => {
+              setTempValue(value.toString());
+              setIsEditing(true);
+            }}
+          >
+            {value}
+          </span>
+        )}
         <Button
           variant="outline"
           size="icon"
