@@ -47,6 +47,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
+      use-haptic:
+        specifier: ^1.1.13
+        version: 1.1.13
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.1
@@ -1557,6 +1560,9 @@ packages:
       '@types/react':
         optional: true
 
+  use-haptic@1.1.13:
+    resolution: {integrity: sha512-Kg6+MaksFTPlbAbf+WTbJPlsXt6z61LsQ1TfnGv29Q/Ewp2pmmAG6WipOMf89zDOiCZ004IHNs/iwpsxSbDa4w==}
+
   use-sidecar@1.1.3:
     resolution: {integrity: sha512-Fedw0aZvkhynoPYlA5WXrMCAMm+nSWdZt6lzJQ7Ok8S6Q+VsHmHpRWndVRJ8Be0ZbkfPc5LRYH+5XrzXcEeLRQ==}
     engines: {node: '>=10'}
@@ -2952,6 +2958,11 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.7
+
+  use-haptic@1.1.13:
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   use-sidecar@1.1.3(@types/react@19.2.7)(react@19.2.3):
     dependencies:

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import { useHaptic } from "use-haptic"
 
 import { cn } from "@/lib/utils"
 
@@ -41,12 +42,19 @@ function Button({
   variant = "default",
   size = "default",
   asChild = false,
+  onClick,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
   }) {
+  const { triggerHaptic } = useHaptic()
   const Comp = asChild ? Slot : "button"
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    triggerHaptic()
+    onClick?.(event)
+  }
 
   return (
     <Comp
@@ -54,6 +62,7 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
+      onClick={handleClick}
       {...props}
     />
   )
