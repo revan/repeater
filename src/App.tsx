@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import WorkoutConfig from './components/WorkoutConfig';
 import Workout from './components/Workout';
 import HistoryPage from './components/HistoryPage';
@@ -18,32 +18,47 @@ const App = () => {
   const [settings, setSettings] = useState<WorkoutSettings | null>(null);
   const [history, setHistory] = useLocalStorage<WorkoutRecord[]>('repeater-history', []);
 
-  const handleStartWorkout = (newSettings: WorkoutSettings) => {
+  const handleStartWorkout = useCallback((newSettings: WorkoutSettings) => {
     setSettings(newSettings);
     setView('workout');
-  };
+  }, []);
 
-  const handleFinishWorkout = () => {
+  const handleSaveWorkout = useCallback((): string | undefined => {
     if (view === 'workout' && settings) {
+      const id = crypto.randomUUID();
       const newRecord: WorkoutRecord = {
-        id: crypto.randomUUID(),
+        id,
         ...settings,
         date: new Date().toISOString(),
       };
-      setHistory([newRecord, ...history]);
+      setHistory(prev => [newRecord, ...prev]);
+      return id;
     }
+    return undefined;
+  }, [view, settings, setHistory]);
+
+  const handleUpdateNotes = useCallback((id: string, notes: string) => {
+    setHistory(prev => prev.map(record => 
+      record.id === id ? { ...record, notes } : record
+    ));
+  }, [setHistory]);
+
+  const handleCancelWorkout = useCallback(() => {
     setView('config');
     setSettings(null);
-  };
+  }, []);
 
-  const handleCancelWorkout = () => {
+  const handleDeleteRecord = useCallback((id: string) => {
+    setHistory(prev => prev.filter(record => record.id !== id));
+  }, [setHistory]);
+
+  const handleOpenHistory = useCallback(() => {
+    setView('history');
+  }, []);
+
+  const handleBackToConfig = useCallback(() => {
     setView('config');
-    setSettings(null);
-  };
-
-  const handleDeleteRecord = (id: string) => {
-    setHistory(history.filter(record => record.id !== id));
-  };
+  }, []);
 
   if (view === 'workout' && settings) {
     return (
@@ -52,7 +67,8 @@ const App = () => {
         workTime={settings.workTime}
         restTime={settings.restTime}
         onCancel={handleCancelWorkout}
-        onComplete={handleFinishWorkout}
+        onSave={handleSaveWorkout}
+        onUpdateNotes={handleUpdateNotes}
       />
     );
   }
@@ -61,7 +77,7 @@ const App = () => {
     return (
       <HistoryPage 
         history={history} 
-        onBack={() => setView('config')} 
+        onBack={handleBackToConfig} 
         onDelete={handleDeleteRecord}
       />
     );
@@ -70,7 +86,7 @@ const App = () => {
   return (
     <WorkoutConfig 
       onStart={handleStartWorkout} 
-      onOpenHistory={() => setView('history')}
+      onOpenHistory={handleOpenHistory}
     />
   );
 };

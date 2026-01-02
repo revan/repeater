@@ -4,4 +4,5 @@ export interface WorkoutRecord {
   workTime: number;
   restTime: number;
   date: string; // ISO string
+  notes?: string;
 }

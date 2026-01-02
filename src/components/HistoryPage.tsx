@@ -101,6 +101,11 @@ const HistoryPage = ({ history, onBack, onDelete }: HistoryPageProps) => {
                     <div className="text-[10px] uppercase text-muted-foreground font-bold">Rest</div>
                   </div>
                 </div>
+                {record.notes && (
+                  <div className="mt-4 pt-3 border-t text-sm text-muted-foreground whitespace-pre-wrap italic">
+                    {record.notes}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))
