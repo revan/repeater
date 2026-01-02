@@ -281,6 +281,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onSave, onUpdateNotes }: 
         {phase !== 'getReady' && phase !== 'completed' && (
           <div className="w-full max-w-sm px-4">
             <Progress 
+              key={`${phase}-${currentRep}`}
               value={progress} 
               className="h-4 rounded-full shadow-inner" 
               indicatorClassName={getPhaseBgColor()}
