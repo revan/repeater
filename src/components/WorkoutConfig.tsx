@@ -2,14 +2,15 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import NumberInput from './NumberInput';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play } from 'lucide-react';
+import { Play, History } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface WorkoutConfigProps {
   onStart: (settings: { reps: number; workTime: number; restTime: number }) => void;
+  onOpenHistory: () => void;
 }
 
-const WorkoutConfig = ({ onStart }: WorkoutConfigProps) => {
+const WorkoutConfig = ({ onStart, onOpenHistory }: WorkoutConfigProps) => {
   const [reps, setReps] = useLocalStorage('repeater-reps', 5);
   const [workTime, setWorkTime] = useLocalStorage('repeater-work-time', 10);
   const [restTime, setRestTime] = useLocalStorage('repeater-rest-time', 30);
@@ -25,8 +26,17 @@ const WorkoutConfig = ({ onStart }: WorkoutConfigProps) => {
 
   return (
     <div className="flex flex-col h-dvh bg-background p-6 overflow-hidden">
-      <header className="py-4 text-center">
+      <header className="relative py-4 text-center">
         <h1 className="text-3xl font-black tracking-tight">REPEATER</h1>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute right-0 top-1/2 -translate-y-1/2"
+          onClick={onOpenHistory}
+          aria-label="View history"
+        >
+          <History className="h-6 w-6" />
+        </Button>
       </header>
 
       <main className="flex-1 flex flex-col max-w-md mx-auto w-full justify-center">
