@@ -77,74 +77,73 @@ const Workout = ({ reps, workTime, restTime, onCancel, onSave, onUpdateNotes }: 
 
     timerRef.current = window.setInterval(() => {
       const elapsed = (Date.now() - startTime) / 1000;
-      setTimeLeft(Math.max(0, initialTimeLeft - elapsed));
+      const newTimeLeft = Math.max(0, initialTimeLeft - elapsed);
+      const currentSecond = Math.ceil(newTimeLeft);
+
+      // Warning vibrations/audio
+      const isCountingDown = phase === 'getReady' || (phase === 'rest' && currentSecond <= 3);
+      if (isCountingDown && currentSecond > 0) {
+        if (lastPlayedCountdownSecond.current !== currentSecond) {
+          playSound(audioRefs.current?.countdown);
+          lastPlayedCountdownSecond.current = currentSecond;
+        }
+      } else {
+        lastPlayedCountdownSecond.current = -1;
+      }
+
+      if (phase === 'rest' && currentSecond <= 3 && currentSecond > 0) {
+        if (lastVibratedSecond.current !== currentSecond) {
+          vibrate(50);
+          lastVibratedSecond.current = currentSecond;
+        }
+      } else if (phase !== 'rest') {
+        lastVibratedSecond.current = -1;
+      }
+
+      if (newTimeLeft === 0) {
+        if (timerRef.current) window.clearInterval(timerRef.current);
+        
+        if (phase === 'getReady') {
+          playSound(audioRefs.current?.countdownComplete);
+          setPhase('work');
+          setTimeLeft(workTime);
+          setTotalTime(workTime);
+        } else if (phase === 'work') {
+          if (currentRep < reps) {
+            vibrate(200);
+            playSound(audioRefs.current?.repComplete);
+            if (restTime > 0) {
+              setPhase('rest');
+              setTimeLeft(restTime);
+              setTotalTime(restTime);
+            } else {
+              setCurrentRep((prev) => prev + 1);
+              setTimeLeft(workTime);
+              setTotalTime(workTime);
+            }
+          } else {
+            vibrate([200, 100, 200, 100, 200]);
+            playSound(audioRefs.current?.workoutComplete);
+            setPhase('completed');
+            const id = onSave();
+            if (id) setRecordId(id);
+          }
+        } else if (phase === 'rest') {
+          playSound(audioRefs.current?.countdownComplete);
+          setCurrentRep((prev) => prev + 1);
+          setPhase('work');
+          setTimeLeft(workTime);
+          setTotalTime(workTime);
+        }
+      } else {
+        setTimeLeft(newTimeLeft);
+      }
     }, 50);
 
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
-  }, [phase, currentRep]);
-
-  // Handle phase transitions and haptics
-  useEffect(() => {
-    if (timeLeft === 0) {
-      if (phase === 'getReady') {
-        playSound(audioRefs.current?.countdownComplete);
-        setPhase('work');
-        setTimeLeft(workTime);
-        setTotalTime(workTime);
-      } else if (phase === 'work') {
-        if (currentRep < reps) {
-          vibrate(200);
-          playSound(audioRefs.current?.repComplete);
-          if (restTime > 0) {
-            setPhase('rest');
-            setTimeLeft(restTime);
-            setTotalTime(restTime);
-          } else {
-            setCurrentRep((prev) => prev + 1);
-            setTimeLeft(workTime);
-            setTotalTime(workTime);
-          }
-        } else {
-          vibrate([200, 100, 200, 100, 200]);
-          playSound(audioRefs.current?.workoutComplete);
-          setPhase('completed');
-          const id = onSave();
-          if (id) setRecordId(id);
-        }
-      } else if (phase === 'rest') {
-        playSound(audioRefs.current?.countdownComplete);
-        setCurrentRep((prev) => prev + 1);
-        setPhase('work');
-        setTimeLeft(workTime);
-        setTotalTime(workTime);
-      }
-    }
-
-    // Warning vibrations for last 3 seconds of rest
-    const currentSecond = Math.ceil(timeLeft);
-    
-    // Countdown audio for getReady and rest phases
-    const isCountingDown = phase === 'getReady' || (phase === 'rest' && currentSecond <= 3);
-    if (isCountingDown && currentSecond > 0) {
-      if (lastPlayedCountdownSecond.current !== currentSecond) {
-        playSound(audioRefs.current?.countdown);
-        lastPlayedCountdownSecond.current = currentSecond;
-      }
-    } else {
-      lastPlayedCountdownSecond.current = -1;
-    }
-
-    if (phase === 'rest' && currentSecond <= 3 && currentSecond > 0) {
-      if (lastVibratedSecond.current !== currentSecond) {
-        vibrate(50);
-        lastVibratedSecond.current = currentSecond;
-      }
-    } else if (phase !== 'rest') {
-      lastVibratedSecond.current = -1;
-    }
-  }, [timeLeft, phase, currentRep, reps, workTime, restTime, onSave]);
+  }, [phase, currentRep, reps, workTime, restTime, onSave]);
 
   // Debounced notes update
   useEffect(() => {
