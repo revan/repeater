@@ -25,7 +25,10 @@ const App = () => {
 
   const handleSaveWorkout = useCallback((): string | undefined => {
     if (view === 'workout' && settings) {
-      const id = crypto.randomUUID();
+      const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+      
       const newRecord: WorkoutRecord = {
         id,
         ...settings,

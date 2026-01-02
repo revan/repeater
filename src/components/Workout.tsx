@@ -37,6 +37,7 @@ const Workout = ({ reps, workTime, restTime, onCancel, onSave, onUpdateNotes }: 
   const [recordId, setRecordId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(true);
   
+  const hasSaved = useRef(false);
   const timerRef = useRef<number | null>(null);
   const lastVibratedSecond = useRef<number>(-1);
   const lastPlayedCountdownSecond = useRef<number>(-1);
@@ -122,11 +123,14 @@ const Workout = ({ reps, workTime, restTime, onCancel, onSave, onUpdateNotes }: 
               setTotalTime(workTime);
             }
           } else {
-            vibrate([200, 100, 200, 100, 200]);
-            playSound(audioRefs.current?.workoutComplete);
-            setPhase('completed');
-            const id = onSave();
-            if (id) setRecordId(id);
+            if (!hasSaved.current) {
+              hasSaved.current = true;
+              vibrate([200, 100, 200, 100, 200]);
+              playSound(audioRefs.current?.workoutComplete);
+              setPhase('completed');
+              const id = onSave();
+              if (id) setRecordId(id);
+            }
           }
         } else if (phase === 'rest') {
           playSound(audioRefs.current?.countdownComplete);
@@ -144,6 +148,23 @@ const Workout = ({ reps, workTime, restTime, onCancel, onSave, onUpdateNotes }: 
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
   }, [phase, currentRep, reps, workTime, restTime, onSave]);
+
+  // Refs for saving notes on unmount
+  const notesRef = useRef(notes);
+  const recordIdRef = useRef(recordId);
+  const isSavedRef = useRef(isSaved);
+
+  useEffect(() => { notesRef.current = notes; }, [notes]);
+  useEffect(() => { recordIdRef.current = recordId; }, [recordId]);
+  useEffect(() => { isSavedRef.current = isSaved; }, [isSaved]);
+
+  useEffect(() => {
+    return () => {
+      if (recordIdRef.current && !isSavedRef.current) {
+        onUpdateNotes(recordIdRef.current, notesRef.current);
+      }
+    };
+  }, [onUpdateNotes]);
 
   // Debounced notes update
   useEffect(() => {
